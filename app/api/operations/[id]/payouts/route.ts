@@ -20,9 +20,6 @@ export async function POST(req:Request,{params}:{params:{id:string}}){
  if(!op)return NextResponse.json({error:"Операция не найдена"},{status:404});
  if(!isOwner(actor)&&op.authorId!==actor.id)return forbidden();
  if(op.status==="COMPLETED"||op.status==="CANCELLED")return NextResponse.json({error:"Операция уже закрыта"},{status:422});
- const paid=await paidSum(params.id);
- const remaining=Number(op.receivedAmount)-paid;
- if(p.data.amountRub>remaining+0.01)return NextResponse.json({error:`Осталось обменять только ${remaining.toFixed(2)} ₽`},{status:422});
  const created=await prisma.payout.create({data:{operationId:params.id,amountRub:p.data.amountRub,clientRate:p.data.clientRate,actualRate:p.data.actualRate}});
  const row=await recomputeOperation(params.id);
  if(op.status==="DRAFT")await prisma.operation.update({where:{id:params.id},data:{status:"PROCESSING"}});
