@@ -1,0 +1,11 @@
+CREATE TABLE "TraderRate" (
+ "id" TEXT NOT NULL,
+ "traderId" TEXT NOT NULL,
+ "name" TEXT NOT NULL,
+ "clientRate" DECIMAL(65,30) NOT NULL,
+ "actualRate" DECIMAL(65,30) NOT NULL,
+ "active" BOOLEAN NOT NULL DEFAULT true,
+ "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+ CONSTRAINT "TraderRate_pkey" PRIMARY KEY ("id")
+);
+ALTER TABLE "TraderRate" ADD CONSTRAINT "TraderRate_traderId_fkey" FOREIGN KEY ("traderId") REFERENCES "User"("id") ON DELETE CASCADE ON UPDATE CASCADE;

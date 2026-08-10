@@ -14,6 +14,7 @@ model User {
  role String @default("OPERATOR")
  operations Operation[]
  requisiteAccess TraderRequisite[]
+ rates TraderRate[]
 }
 model Currency {
  code String @id
@@ -120,4 +121,14 @@ model TraderRequisite {
  trader User @relation(fields:[traderId],references:[id],onDelete:Cascade)
  requisite Requisite @relation(fields:[requisiteId],references:[id],onDelete:Cascade)
  @@id([traderId,requisiteId])
+}
+model TraderRate {
+ id String @id @default(cuid())
+ traderId String
+ trader User @relation(fields:[traderId],references:[id],onDelete:Cascade)
+ name String
+ clientRate Decimal
+ actualRate Decimal
+ active Boolean @default(true)
+ createdAt DateTime @default(now())
 }

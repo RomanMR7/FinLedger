@@ -7,13 +7,13 @@ type Op={id:string;number:number;date:string;status:string;receivedAmount:string
 type F={receivedAmount:number;tariffPercent:number;clientRate:number;actualExchangeRate:number;expenses:number};
 type PayoutF={amountRub:number;clientRate:number;actualRate:number};
 type Tariff={id:string;name:string;percent:string|number};
-type Requisite={id:string;name:string;active:boolean;availableToday:number};
+type Requisite={id:string;name:string;active:boolean;availableToday:number};type Rate={id:string;name:string;clientRate:string|number;actualRate:string|number};
 const initial:F={receivedAmount:0,tariffPercent:0,clientRate:92,actualExchangeRate:86.15,expenses:0};
 const statusName=(v:string)=>({DRAFT:"Черновик",PROCESSING:"В работе",COMPLETED:"Завершена",CANCELLED:"Отменена"}[v]??v);
 const paidOf=(x:Op)=>(x.payouts??[]).reduce((a,p)=>a+Number(p.amountRub),0);
 const remainingOf=(x:Op)=>Math.max(0,Number(x.receivedAmount)-paidOf(x));
 export default function Operations(){
- const [f,setF]=useState<F>(initial),[tariffs,setTariffs]=useState<Tariff[]>([]),[requisites,setRequisites]=useState<Requisite[]>([]),[requisiteId,setRequisiteId]=useState(""),[choice,setChoice]=useState("0");
+ const [f,setF]=useState<F>(initial),[tariffs,setTariffs]=useState<Tariff[]>([]),[rates,setRates]=useState<Rate[]>([]),[requisites,setRequisites]=useState<Requisite[]>([]),[requisiteId,setRequisiteId]=useState(""),[choice,setChoice]=useState("0");
  const [ef,setEf]=useState<F>(initial),[editRequisiteId,setEditRequisiteId]=useState("");
  const [pf,setPf]=useState<PayoutF>({amountRub:0,clientRate:92,actualRate:86.15});
  const [rows,setRows]=useState<Op[]>([]),[meta,setMeta]=useState({page:1,totalPages:1,total:0});
@@ -31,12 +31,13 @@ export default function Operations(){
   setLoadError(error);
  };
  const loadRefs=async()=>{
-  const [s,r]=await Promise.all([
+  const [s,r,rateData]=await Promise.all([
    fetchJson<{tariffs:Tariff[]}>("/api/settings",{tariffs:[]}),
-   fetchJson<Requisite[]>("/api/requisites",[])
+   fetchJson<Requisite[]>("/api/requisites",[]),
+   fetchJson<Rate[]>("/api/rates",[])
   ]);
   setTariffs(Array.isArray(s.data.tariffs)?s.data.tariffs:[]);
-  setRequisites(Array.isArray(r.data)?r.data:[]);
+  setRequisites(Array.isArray(r.data)?r.data:[]);setRates(Array.isArray(rateData.data)?rateData.data:[]);
  };
  /* eslint-disable react-hooks/exhaustive-deps */
  useEffect(()=>{loadRefs();load()},[]);
@@ -96,6 +97,7 @@ export default function Operations(){
  <form onSubmit={save}><div className="grid">
   <Num label="Получено, ₽" value={f.receivedAmount} set={v=>set("receivedAmount",v)}/>
   <label>Схема расчёта<select value={choice} onChange={e=>{const value=e.target.value;setChoice(value);if(value!=="manual")set("tariffPercent",value)}}><option value="0">По курсу (без тарифа)</option>{tariffs.map(t=><option key={t.id} value={t.percent}>По тарифу — {Number(t.percent)}%</option>)}<option value="manual">Свой процент</option></select></label>{choice!=="0"&&<Num label="Тариф, %" value={f.tariffPercent} set={v=>{set("tariffPercent",v);setChoice("manual")}}/>}
+  {rates.length>0&&<label>Пара курсов<select defaultValue="" onChange={e=>{const rate=rates.find(x=>x.id===e.target.value);if(rate){set("clientRate",String(rate.clientRate));set("actualExchangeRate",String(rate.actualRate))}}><option value="">Выберите курс</option>{rates.map(rate=><option value={rate.id} key={rate.id}>{rate.name}: {rate.clientRate} / {rate.actualRate}</option>)}</select></label>}
   <label>Карта / SIM приёма<select value={requisiteId} onChange={e=>setRequisiteId(e.target.value)}><option value="">Без привязки</option>{requisiteOptions(requisiteId)}</select></label>
   <Num label="Курс заливки на карту, ₽ за 1 USDT" value={f.clientRate} set={v=>set("clientRate",v)}/>
   <Num label="Курс покупки USDT, ₽ за 1 USDT" value={f.actualExchangeRate} set={v=>set("actualExchangeRate",v)}/>
@@ -135,7 +137,8 @@ export default function Operations(){
   {(selected.payouts?.length??0)>0&&<p className="notice">По операции уже есть частичные обмены — курсы и итоги считаются по ним. Здесь можно поменять сумму приёма, расходы и карту.</p>}
   <div className="grid">
    <Num label="Получено, ₽" value={ef.receivedAmount} set={v=>setE("receivedAmount",v)}/>
-   <label>Карта / SIM приёма<select value={editRequisiteId} onChange={e=>setEditRequisiteId(e.target.value)}><option value="">Без привязки</option>{requisiteOptions(editRequisiteId)}</select></label>
+   {rates.length>0&&<label>Пара курсов<select defaultValue="" onChange={e=>{const rate=rates.find(x=>x.id===e.target.value);if(rate){set("clientRate",String(rate.clientRate));set("actualExchangeRate",String(rate.actualRate))}}><option value="">Выберите курс</option>{rates.map(rate=><option value={rate.id} key={rate.id}>{rate.name}: {rate.clientRate} / {rate.actualRate}</option>)}</select></label>}
+  <label>Карта / SIM приёма<select value={editRequisiteId} onChange={e=>setEditRequisiteId(e.target.value)}><option value="">Без привязки</option>{requisiteOptions(editRequisiteId)}</select></label>
    <Num label="Тариф, % (0 — по курсу)" value={ef.tariffPercent} set={v=>setE("tariffPercent",v)}/>
    {(selected.payouts?.length??0)===0&&<>
     <Num label="Курс заливки на карту, ₽ за 1 USDT" value={ef.clientRate} set={v=>setE("clientRate",v)}/>
