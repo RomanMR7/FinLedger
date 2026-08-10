@@ -161,8 +161,8 @@ export default function Operations(){
   {pc&&pf.amountRub>0&&<section className="cards">
    <Card t="Клиенту отправить" v={`${pc.payoutUsdt.toFixed(4)} USDT`}/>
    {Number(selected.tariffPercent)>0&&<Card t="Доход по тарифу" v={`${pc.tariffProfit.toFixed(2)} ₽`}/>}
-   <Card t="Доход на курсах" v={`${pc.exchangeProfitRub.toFixed(2)} ₽`}/>
-   <Card t="Доход с части" v={`${pc.totalProfitRub.toFixed(2)} ₽`}/>
+   <Card t="Доход на курсах" v={`${pc.exchangeProfitRub.toFixed(2)} ₽ · ${(pc.exchangeProfitRub/pf.actualRate).toFixed(4)} USDT`}/>
+   <Card t="Доход с части" v={`${pc.totalProfitRub.toFixed(2)} ₽ · ${(pc.totalProfitRub/pf.actualRate).toFixed(4)} USDT`}/>
   </section>}
   <button onClick={addPayout}>Записать обмен</button>
   <PayoutList op={selected} onRemove={removePayout}/>
