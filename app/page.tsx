@@ -1,9 +1,10 @@
 import {dashboardData} from "@/src/lib/dashboard";
 import Link from "next/link";
+import {getCurrentActor} from "@/src/lib/auth";import {redirect} from "next/navigation";
 export const dynamic="force-dynamic";
 const statusName=(v:string)=>({DRAFT:"Черновики",PROCESSING:"В работе",COMPLETED:"Завершены",CANCELLED:"Отменены"}[v]??v);
 const order=["DRAFT","PROCESSING","COMPLETED","CANCELLED"];
-export default async function Page(){
+export default async function Page(){const actor=await getCurrentActor();if(actor&&actor.role!=="OWNER")redirect("/operations");
  let d:Awaited<ReturnType<typeof dashboardData>>|null=null;
  let error="";
  try{d=await dashboardData()}catch{error="База данных недоступна. Запустите её командой npm run db:up, затем npm run db:setup."}

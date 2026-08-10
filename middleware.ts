@@ -1,0 +1,3 @@
+import {NextRequest,NextResponse} from "next/server";
+export function middleware(req:NextRequest){const path=req.nextUrl.pathname;if(path.startsWith("/login")||path.startsWith("/api/auth")||path.startsWith("/_next"))return NextResponse.next();if(!req.cookies.get("finledger_session")){const url=req.nextUrl.clone();url.pathname="/login";return NextResponse.redirect(url)}return NextResponse.next()}
+export const config={matcher:["/((?!favicon.ico).*)"]};

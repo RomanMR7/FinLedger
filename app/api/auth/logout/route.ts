@@ -1,0 +1,1 @@
+import {NextResponse} from "next/server";import {sessionCookie} from "@/src/lib/auth";export async function POST(){const r=NextResponse.json({ok:true});r.cookies.set(sessionCookie,"",{path:"/",maxAge:0});return r}

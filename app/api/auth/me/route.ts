@@ -1,0 +1,1 @@
+import {NextResponse} from "next/server";import {getActorFromRequest,unauthorized} from "@/src/lib/auth";export async function GET(req:Request){const actor=await getActorFromRequest(req);return actor?NextResponse.json(actor):unauthorized()}

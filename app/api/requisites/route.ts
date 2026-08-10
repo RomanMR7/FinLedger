@@ -1,9 +1,10 @@
 import {NextResponse} from "next/server";
 import {prisma} from "@/src/lib/db";
 import {z} from "zod";
+import {getActorFromRequest,isOwner,unauthorized,forbidden} from "@/src/lib/auth";
 export const dynamic="force-dynamic";
 const create=z.object({name:z.string().min(2).max(80),type:z.enum(["SIM","BANK_CARD"]),maskedValue:z.string().min(4).max(40),dailyLimit:z.coerce.number().positive(),monthlyLimit:z.coerce.number().positive(),balance:z.coerce.number().min(0).default(0)});
-export async function GET(){
+export async function GET(req:Request){const actor=await getActorFromRequest(req);if(!actor)return unauthorized();
  const day=new Date();day.setHours(0,0,0,0);
  const month=new Date(day.getFullYear(),day.getMonth(),1);
  const [all,daily,monthly]=await Promise.all([
@@ -20,7 +21,7 @@ export async function GET(){
  });
  return NextResponse.json(result);
 }
-export async function PATCH(req:Request){
+export async function PATCH(req:Request){const actor=await getActorFromRequest(req);if(!actor)return unauthorized();if(!isOwner(actor))return forbidden();
  const b=await req.json();
  const p=create.partial().extend({id:z.string(),active:z.boolean().optional()}).safeParse(b);
  if(!p.success)return NextResponse.json({error:"Некорректные значения"},{status:400});
@@ -29,14 +30,14 @@ export async function PATCH(req:Request){
  await prisma.auditLog.create({data:{action:"UPDATE",entity:"Requisite",entityId:id,details:JSON.stringify(data)}});
  return NextResponse.json(r);
 }
-export async function POST(req:Request){
+export async function POST(req:Request){const actor=await getActorFromRequest(req);if(!actor)return unauthorized();if(!isOwner(actor))return forbidden();
  const parsed=create.safeParse(await req.json());
  if(!parsed.success)return NextResponse.json({error:"Заполните название, маску и положительные лимиты"},{status:400});
  const r=await prisma.requisite.create({data:parsed.data});
  await prisma.auditLog.create({data:{action:"CREATE",entity:"Requisite",entityId:r.id,details:r.name}});
  return NextResponse.json(r,{status:201});
 }
-export async function DELETE(req:Request){
+export async function DELETE(req:Request){const actor=await getActorFromRequest(req);if(!actor)return unauthorized();if(!isOwner(actor))return forbidden();
  const id=new URL(req.url).searchParams.get("id");
  if(!id)return NextResponse.json({error:"Не указан id реквизита"},{status:400});
  const row=await prisma.requisite.delete({where:{id}}).catch(()=>null);
