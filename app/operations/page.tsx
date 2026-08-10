@@ -3,7 +3,7 @@ import {FormEvent,useEffect,useMemo,useState} from "react";
 import {calculateDeal} from "@/src/lib/financial";
 import {fetchJson} from "@/src/lib/client";
 type Payout={id:string;amountRub:string;clientRate:string;actualRate:string;payoutUsdt:string;tariffProfit:string;exchangeProfit:string;totalProfit:string;date:string};
-type Op={id:string;number:number;date:string;status:string;receivedAmount:string;tariffPercent:string;clientRate:string|null;actualExchangeRate:string|null;expenses:string;sentAmount:string;expectedCommission:string;exchangeProfit:string|null;totalProfit:string|null;actualResult:string;requisiteId:string|null;payouts?:Payout[];author?:{name:string;email:string}};
+type Op={id:string;number:number;date:string;status:string;receivedAmount:string;tariffPercent:string;clientRate:string|null;actualExchangeRate:string|null;expenses:string;purchaseAmountRub:string|null;purchasedUsdt:string|null;sentAmount:string;expectedCommission:string;exchangeProfit:string|null;totalProfit:string|null;actualResult:string;requisiteId:string|null;payouts?:Payout[];author?:{name:string;email:string}};
 type F={receivedAmount:number;tariffPercent:number;clientRate:number;actualExchangeRate:number;expenses:number;purchaseAmountRub:number};
 type PayoutF={amountRub:number;clientRate:number;actualRate:number};
 type Tariff={id:string;name:string;percent:string|number};
@@ -184,10 +184,7 @@ export default function Operations(){
  <button className="cancel" onClick={closeModal}>Закрыть</button>
  </section></div>}</>;
 }
-function PayoutInfo({op}:{op:Op}){
- const paid=paidOf(op),remaining=remainingOf(op);
- return <p className={remaining>0?"notice":"ok-note"}>Принято {Number(op.receivedAmount).toFixed(2)} ₽ · обменяно {paid.toFixed(2)} ₽ · <strong>осталось {remaining.toFixed(2)} ₽</strong></p>;
-}
+function PayoutInfo({op}:{op:Op}){const owed=Number(op.sentAmount);const bought=Number(op.purchasedUsdt??0);const remaining=Math.max(0,owed-bought);return <p className={remaining>0?"notice":"ok-note"}>Должны отдать {owed.toFixed(4)} USDT · куплено {bought.toFixed(4)} USDT · <strong>осталось отдать {remaining.toFixed(4)} USDT</strong></p>}
 function PayoutList({op,onRemove}:{op:Op;onRemove?:(id:string)=>void}){
  const list=op.payouts??[];
  if(list.length===0)return null;
