@@ -97,7 +97,7 @@ export default function Operations(){
  <form onSubmit={save}><div className="grid">
   <Num label="Получено, ₽" value={f.receivedAmount} set={v=>set("receivedAmount",v)}/>
   <label>Схема расчёта<select value={choice} onChange={e=>{const value=e.target.value;setChoice(value);if(value!=="manual")set("tariffPercent",value)}}><option value="0">По курсу (без тарифа)</option>{tariffs.map(t=><option key={t.id} value={t.percent}>По тарифу — {Number(t.percent)}%</option>)}<option value="manual">Свой процент</option></select></label>{choice!=="0"&&<Num label="Тариф, %" value={f.tariffPercent} set={v=>{set("tariffPercent",v);setChoice("manual")}}/>}
-  {rates.length>0&&<label>Пара курсов<select defaultValue="" onChange={e=>{const rate=rates.find(x=>x.id===e.target.value);if(rate){set("clientRate",String(rate.clientRate));set("actualExchangeRate",String(rate.actualRate))}}><option value="">Выберите курс</option>{rates.map(rate=><option value={rate.id} key={rate.id}>{rate.name}: {rate.clientRate} / {rate.actualRate}</option>)}</select></label>}
+  {rates.length>0&&<label>Пара курсов<select defaultValue="" onChange={e=>{const rate=rates.find(x=>x.id===e.target.value);if(rate){set("clientRate",String(rate.clientRate));set("actualExchangeRate",String(rate.actualRate))}}}><option value="">Выберите курс</option>{rates.map(rate=><option value={rate.id} key={rate.id}>{rate.name}: {rate.clientRate} / {rate.actualRate}</option>)}</select></label>}
   <label>Карта / SIM приёма<select value={requisiteId} onChange={e=>setRequisiteId(e.target.value)}><option value="">Без привязки</option>{requisiteOptions(requisiteId)}</select></label>
   <Num label="Курс заливки на карту, ₽ за 1 USDT" value={f.clientRate} set={v=>set("clientRate",v)}/>
   <Num label="Курс покупки USDT, ₽ за 1 USDT" value={f.actualExchangeRate} set={v=>set("actualExchangeRate",v)}/>
@@ -137,7 +137,7 @@ export default function Operations(){
   {(selected.payouts?.length??0)>0&&<p className="notice">По операции уже есть частичные обмены — курсы и итоги считаются по ним. Здесь можно поменять сумму приёма, расходы и карту.</p>}
   <div className="grid">
    <Num label="Получено, ₽" value={ef.receivedAmount} set={v=>setE("receivedAmount",v)}/>
-   {rates.length>0&&<label>Пара курсов<select defaultValue="" onChange={e=>{const rate=rates.find(x=>x.id===e.target.value);if(rate){set("clientRate",String(rate.clientRate));set("actualExchangeRate",String(rate.actualRate))}}><option value="">Выберите курс</option>{rates.map(rate=><option value={rate.id} key={rate.id}>{rate.name}: {rate.clientRate} / {rate.actualRate}</option>)}</select></label>}
+   {rates.length>0&&<label>Пара курсов<select defaultValue="" onChange={e=>{const rate=rates.find(x=>x.id===e.target.value);if(rate){set("clientRate",String(rate.clientRate));set("actualExchangeRate",String(rate.actualRate))}}}><option value="">Выберите курс</option>{rates.map(rate=><option value={rate.id} key={rate.id}>{rate.name}: {rate.clientRate} / {rate.actualRate}</option>)}</select></label>}
   <label>Карта / SIM приёма<select value={editRequisiteId} onChange={e=>setEditRequisiteId(e.target.value)}><option value="">Без привязки</option>{requisiteOptions(editRequisiteId)}</select></label>
    <Num label="Тариф, % (0 — по курсу)" value={ef.tariffPercent} set={v=>setE("tariffPercent",v)}/>
    {(selected.payouts?.length??0)===0&&<>
