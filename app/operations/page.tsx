@@ -196,7 +196,7 @@ function PayoutList({op,onRemove}:{op:Op;onRemove?:(id:string)=>void}){
   <td>{new Date(p.date).toLocaleString("ru-RU",{day:"2-digit",month:"2-digit",hour:"2-digit",minute:"2-digit"})}</td>
   <td>{Number(p.amountRub).toFixed(2)}</td><td>{Number(p.clientRate).toFixed(4)}</td><td>{Number(p.actualRate).toFixed(4)}</td>
   <td>{Number(p.payoutUsdt).toFixed(4)}</td><td>{Number(p.totalProfit).toFixed(2)}</td>
-  {onRemove&&<td><button className="small cancel" onClick={()=>onRemove(p.id)}>×</button></td>}
+  {onRemove&&<td><button className="small cancel" onClick={()=>onRemove(p.id)}>Отменить обмен</button></td>}
  </tr>)}
  </tbody></table></>;
 }
