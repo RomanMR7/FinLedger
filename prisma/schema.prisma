@@ -12,6 +12,7 @@ model User {
  passwordHash String
  role String @default("OPERATOR")
  operations Operation[]
+ requisiteAccess TraderRequisite[]
 }
 model Currency {
  code String @id
@@ -44,6 +45,7 @@ model Requisite {
  balance Decimal @default(0)
  active Boolean @default(true)
  operations Operation[]
+ requisiteAccess TraderRequisite[]
 }
 model Operation {
  id String @id @default(cuid())
@@ -111,7 +113,10 @@ model AuditLog {
  details String?
  createdAt DateTime @default(now())
 }
-
-
-
-
+model TraderRequisite {
+ traderId String
+ requisiteId String
+ trader User @relation(fields:[traderId],references:[id],onDelete:Cascade)
+ requisite Requisite @relation(fields:[requisiteId],references:[id],onDelete:Cascade)
+ @@id([traderId,requisiteId])
+}

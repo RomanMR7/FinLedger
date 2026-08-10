@@ -8,7 +8,7 @@ export async function GET(req:Request){const actor=await getActorFromRequest(req
  const day=new Date();day.setHours(0,0,0,0);
  const month=new Date(day.getFullYear(),day.getMonth(),1);
  const [all,daily,monthly]=await Promise.all([
-  prisma.requisite.findMany({orderBy:{name:"asc"}}),
+  prisma.requisite.findMany({where:isOwner(actor)?{}:{requisiteAccess:{some:{traderId:actor.id}}},orderBy:{name:"asc"}}),
   prisma.operation.groupBy({by:["requisiteId"],where:{status:"COMPLETED",date:{gte:day},requisiteId:{not:null}},_sum:{receivedAmount:true}}),
   prisma.operation.groupBy({by:["requisiteId"],where:{status:"COMPLETED",date:{gte:month},requisiteId:{not:null}},_sum:{receivedAmount:true}})
  ]);
