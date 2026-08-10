@@ -1,0 +1,17 @@
+# Dependencies and build output
+node_modules/
+.next/
+*.tsbuildinfo
+
+# Local configuration and data
+.env
+.env.local
+backups/
+*.sql
+
+# Deployment tooling
+.vercel/
+# Personal editor settings and locally generated reports
+.claude/
+*.xlsx
+*.pdf

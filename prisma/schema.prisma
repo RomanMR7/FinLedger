@@ -1,0 +1,117 @@
+generator client {
+ provider = "prisma-client-js"
+}
+datasource db {
+ provider = "postgresql"
+ url = env("DATABASE_URL")
+}
+model User {
+ id String @id @default(cuid())
+ email String @unique
+ name String
+ passwordHash String
+ role String @default("OPERATOR")
+ operations Operation[]
+}
+model Currency {
+ code String @id
+ name String
+ rateToRub Decimal @default(1)
+ active Boolean @default(true)
+}
+model Counterparty {
+ id String @id @default(cuid())
+ name String @unique
+ operations Operation[]
+}
+model Channel {
+ id String @id @default(cuid())
+ name String @unique
+ operations Operation[]
+}
+model Tariff {
+ id String @id @default(cuid())
+ name String @unique
+ percent Decimal
+}
+model Requisite {
+ id String @id @default(cuid())
+ name String
+ type String
+ maskedValue String
+ dailyLimit Decimal
+ monthlyLimit Decimal
+ balance Decimal @default(0)
+ active Boolean @default(true)
+ operations Operation[]
+}
+model Operation {
+ id String @id @default(cuid())
+ number Int @unique
+ date DateTime @default(now())
+ type String
+ status String @default("DRAFT")
+ counterpartyId String?
+ counterparty Counterparty? @relation(fields: [counterpartyId], references: [id])
+ channelId String?
+ channel Channel? @relation(fields: [channelId], references: [id])
+ requisiteId String?
+ requisite Requisite? @relation(fields: [requisiteId], references: [id])
+ receivedAmount Decimal
+ receivedCurrency String
+ sentAmount Decimal
+ sentCurrency String
+ receivedRate Decimal
+ sentRate Decimal
+ actualRate Decimal
+ tariffPercent Decimal
+ expectedCommission Decimal
+ actualResult Decimal
+ variance Decimal
+ expenses Decimal @default(0)
+ clientRate Decimal?
+ actualExchangeRate Decimal?
+ exchangeProfit Decimal?
+ totalProfit Decimal?
+ clientReference String?
+ note String?
+ createdAt DateTime @default(now())
+ updatedAt DateTime @default(now()) @updatedAt
+ authorId String
+ author User @relation(fields: [authorId], references: [id])
+ payouts Payout[]
+}
+model Payout {
+ id String @id @default(cuid())
+ operationId String
+ operation Operation @relation(fields: [operationId], references: [id], onDelete: Cascade)
+ amountRub Decimal
+ clientRate Decimal
+ actualRate Decimal
+ payoutUsdt Decimal @default(0)
+ tariffProfit Decimal @default(0)
+ exchangeProfit Decimal @default(0)
+ totalProfit Decimal @default(0)
+ date DateTime @default(now())
+}
+model Task {
+ id String @id @default(cuid())
+ title String
+ description String?
+ status String @default("TODO")
+ priority String @default("MEDIUM")
+ dueDate DateTime?
+ createdAt DateTime @default(now())
+}
+model AuditLog {
+ id String @id @default(cuid())
+ action String
+ entity String
+ entityId String
+ details String?
+ createdAt DateTime @default(now())
+}
+
+
+
+

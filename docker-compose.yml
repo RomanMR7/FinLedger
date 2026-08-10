@@ -1,0 +1,20 @@
+services:
+  db:
+    image: postgres:16-alpine
+    container_name: fin-ledger-db
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: finledger
+      POSTGRES_PASSWORD: finledger_local
+      POSTGRES_DB: finledger
+    ports:
+      - "5434:5432"
+    volumes:
+      - finledger_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U finledger -d finledger"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+volumes:
+  finledger_data:
