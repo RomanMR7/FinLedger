@@ -152,7 +152,7 @@ export default function Operations(){
  </>}
  {mode==="payout"&&<>
   <h3>Обмен по операции №{selected.number}</h3>
-  <PayoutInfo op={selected}/>
+  <PayoutInfo op={selected} rate={pf.actualRate}/>
   <div className="grid">
    <Num label="Сумма этого обмена, ₽" value={pf.amountRub} set={v=>setP("amountRub",v)}/>
    <Num label="Курс заливки на карту, ₽ за 1 USDT" value={pf.clientRate} set={v=>setP("clientRate",v)}/>
@@ -184,7 +184,7 @@ export default function Operations(){
  <button className="cancel" onClick={closeModal}>Закрыть</button>
  </section></div>}</>;
 }
-function PayoutInfo({op}:{op:Op}){const owed=Number(op.sentAmount);const bought=Number(op.purchasedUsdt??0);const remaining=Math.max(0,owed-bought);return <p className={remaining>0?"notice":"ok-note"}>Должны отдать {owed.toFixed(4)} USDT · куплено {bought.toFixed(4)} USDT · <strong>осталось отдать {remaining.toFixed(4)} USDT</strong></p>}
+function PayoutInfo({op,rate}:{op:Op;rate:number}){const owed=Number(op.sentAmount),bought=Number(op.purchasedUsdt??0),remaining=Math.max(0,owed-bought),rub=remaining*rate;return <p className={remaining>0?"notice":"ok-note"}>Должны отдать {owed.toFixed(4)} USDT · куплено {bought.toFixed(4)} USDT · <strong>осталось {remaining.toFixed(4)} USDT (≈ {rub.toFixed(2)} ₽ по текущему курсу {rate})</strong></p>}
 function PayoutList({op,onRemove}:{op:Op;onRemove?:(id:string)=>void}){
  const list=op.payouts??[];
  if(list.length===0)return null;
