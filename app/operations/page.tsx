@@ -196,6 +196,6 @@ function PayoutList({op,onRemove}:{op:Op;onRemove?:(id:string)=>void}){
  </tr>)}
  </tbody></table></>;
 }
-function Num({label,value,set}:{label:string;value:number;set:(v:string)=>void}){return <label>{label}<input required type="number" min="0" step="any" value={value} onFocus={e=>e.currentTarget.select()} onChange={e=>set(e.target.value)}/></label>}
+function Num({label,value,set}:{label:string;value:number;set:(v:string)=>void}){const [text,setText]=useState(Number.isFinite(value)?String(value):"");useEffect(()=>{setText(Number.isFinite(value)?String(value):"")},[value]);return <label>{label}<input required type="text" inputMode="decimal" value={text} onFocus={e=>e.currentTarget.select()} onChange={e=>{const raw=e.target.value;if(!/^\d*([.,]\d*)?$/.test(raw))return;setText(raw);const normalized=raw.replace(",", ".");set(normalized===""?"NaN":normalized)}}/></label>}
 function Summary({c}:{c:ReturnType<typeof calculateDeal>}){return <section className="cards"><Card t="Клиенту отправить" v={`${c.payoutUsdt.toFixed(4)} USDT`}/>{c.tariffProfit>0&&<Card t="Доход по тарифу" v={`${c.tariffProfit.toFixed(2)} ₽`}/>}<Card t="Доход на разнице курсов" v={`${c.exchangeProfitRub.toFixed(2)} ₽`}/><Card t="Общий доход" v={`${c.totalProfitRub.toFixed(2)} ₽`}/></section>}
 function Card({t,v}:{t:string;v:string}){return <article><small>{t}</small><strong>{v}</strong></article>}
