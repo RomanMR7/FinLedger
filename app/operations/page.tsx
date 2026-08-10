@@ -17,6 +17,7 @@ export default function Operations(){
  const [ef,setEf]=useState<F>(initial),[editRequisiteId,setEditRequisiteId]=useState("");
  const [pf,setPf]=useState<PayoutF>({amountRub:0,clientRate:92,actualRate:86.15});
  const [rows,setRows]=useState<Op[]>([]),[meta,setMeta]=useState({page:1,totalPages:1,total:0});
+ const [canCustom,setCanCustom]=useState(false);
  const [status,setStatus]=useState(""),[search,setSearch]=useState(""),[from,setFrom]=useState(""),[to,setTo]=useState("");
  const [selected,setSelected]=useState<Op|null>(null),[mode,setMode]=useState<"view"|"edit"|"payout">("view"),[message,setMessage]=useState(""),[loadError,setLoadError]=useState("");
  const c=useMemo(()=>calculateDeal({amountRub:f.receivedAmount,tariffPercent:f.tariffPercent,clientRate:f.clientRate,actualRate:f.actualExchangeRate,expenses:f.expenses}),[f]);
@@ -40,7 +41,7 @@ export default function Operations(){
   setRequisites(Array.isArray(r.data)?r.data:[]);setRates(Array.isArray(rateData.data)?rateData.data:[]);
  };
  /* eslint-disable react-hooks/exhaustive-deps */
- useEffect(()=>{loadRefs();load()},[]);
+ useEffect(()=>{loadRefs();load();fetchJson<{canUseCustomTariff:boolean}>("/api/auth/me",{canUseCustomTariff:false}).then(r=>setCanCustom(r.data.canUseCustomTariff))},[]);
  const set=(k:keyof F,v:string)=>setF(x=>({...x,[k]:Number(v)}));
  const setE=(k:keyof F,v:string)=>setEf(x=>({...x,[k]:Number(v)}));
  const setP=(k:keyof PayoutF,v:string)=>setPf(x=>({...x,[k]:Number(v)}));
@@ -96,7 +97,7 @@ export default function Operations(){
  {loadError&&<p className="error">{loadError}</p>}
  <form onSubmit={save}><div className="grid">
   <Num label="Получено, ₽" value={f.receivedAmount} set={v=>set("receivedAmount",v)}/>
-  <label>Схема расчёта<select value={choice} onChange={e=>{const value=e.target.value;setChoice(value);if(value!=="manual")set("tariffPercent",value)}}><option value="0">По курсу (без тарифа)</option>{tariffs.map(t=><option key={t.id} value={t.percent}>По тарифу — {Number(t.percent)}%</option>)}<option value="manual">Свой процент</option></select></label>{choice!=="0"&&<Num label="Тариф, %" value={f.tariffPercent} set={v=>{set("tariffPercent",v);setChoice("manual")}}/>}
+  <label>Схема расчёта<select value={choice} onChange={e=>{const value=e.target.value;setChoice(value);if(value!=="manual")set("tariffPercent",value)}}><option value="0">По курсу (без тарифа)</option>{tariffs.map(t=><option key={t.id} value={t.percent}>По тарифу — {Number(t.percent)}%</option>)}{canCustom&&<option value="manual">Свой процент</option>}</select></label>{choice!=="0"&&canCustom&&<Num label="Тариф, %" value={f.tariffPercent} set={v=>{set("tariffPercent",v);setChoice("manual")}}/>}
   {rates.length>0&&<label>Пара курсов<select defaultValue="" onChange={e=>{const rate=rates.find(x=>x.id===e.target.value);if(rate){set("clientRate",String(rate.clientRate));set("actualExchangeRate",String(rate.actualRate))}}}><option value="">Выберите курс</option>{rates.map(rate=><option value={rate.id} key={rate.id}>{rate.name}: {rate.clientRate} / {rate.actualRate}</option>)}</select></label>}
   <label>Карта / SIM приёма<select value={requisiteId} onChange={e=>setRequisiteId(e.target.value)}><option value="">Без привязки</option>{requisiteOptions(requisiteId)}</select></label>
   <Num label="Курс заливки на карту, ₽ за 1 USDT" value={f.clientRate} set={v=>set("clientRate",v)}/>

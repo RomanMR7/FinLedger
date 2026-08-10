@@ -12,6 +12,7 @@ model User {
  name String
  passwordHash String
  role String @default("OPERATOR")
+ canUseCustomTariff Boolean @default(false)
  operations Operation[]
  requisiteAccess TraderRequisite[]
  rates TraderRate[]

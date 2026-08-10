@@ -1,0 +1,1 @@
+ALTER TABLE "User" ADD COLUMN "canUseCustomTariff" BOOLEAN NOT NULL DEFAULT false;
