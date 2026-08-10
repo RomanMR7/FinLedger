@@ -3,7 +3,7 @@ import {FormEvent,useEffect,useMemo,useState} from "react";
 import {calculateDeal} from "@/src/lib/financial";
 import {fetchJson} from "@/src/lib/client";
 type Payout={id:string;amountRub:string;clientRate:string;actualRate:string;payoutUsdt:string;tariffProfit:string;exchangeProfit:string;totalProfit:string;date:string};
-type Op={id:string;number:number;date:string;status:string;receivedAmount:string;tariffPercent:string;clientRate:string|null;actualExchangeRate:string|null;expenses:string;sentAmount:string;expectedCommission:string;exchangeProfit:string|null;totalProfit:string|null;actualResult:string;requisiteId:string|null;payouts?:Payout[]};
+type Op={id:string;number:number;date:string;status:string;receivedAmount:string;tariffPercent:string;clientRate:string|null;actualExchangeRate:string|null;expenses:string;sentAmount:string;expectedCommission:string;exchangeProfit:string|null;totalProfit:string|null;actualResult:string;requisiteId:string|null;payouts?:Payout[];author?:{name:string;email:string}};
 type F={receivedAmount:number;tariffPercent:number;clientRate:number;actualExchangeRate:number;expenses:number};
 type PayoutF={amountRub:number;clientRate:number;actualRate:number};
 type Tariff={id:string;name:string;percent:string|number};
@@ -115,9 +115,9 @@ export default function Operations(){
   <span>Страница {meta.page} из {meta.totalPages||1}</span>
   <button type="button" disabled={meta.page>=meta.totalPages} onClick={()=>load(meta.page+1)}>Вперёд →</button>
  </div>
- <table><thead><tr><th>№</th><th>Дата</th><th>Сумма</th><th>Обменяно</th><th>USDT</th><th>Доход</th><th>Статус</th><th></th></tr></thead><tbody>
+ <table><thead><tr><th>№</th><th>Дата</th><th>Трейдер</th><th>Сумма</th><th>Обменяно</th><th>USDT</th><th>Доход</th><th>Статус</th><th></th></tr></thead><tbody>
  {rows.map(x=>{const paid=paidOf(x),remaining=remainingOf(x),open=x.status!=="COMPLETED"&&x.status!=="CANCELLED";return <tr key={x.id}>
-  <td>{x.number}</td><td>{new Date(x.date).toLocaleDateString("ru-RU")}</td><td>{Number(x.receivedAmount).toFixed(2)} ₽</td>
+  <td>{x.number}</td><td>{new Date(x.date).toLocaleDateString("ru-RU")}</td><td>{x.author?.name??"—"}</td><td>{Number(x.receivedAmount).toFixed(2)} ₽</td>
   <td>{(x.payouts?.length??0)>0?`${paid.toFixed(0)} ₽${remaining>0?` (ост. ${remaining.toFixed(0)})`:" ✓"}`:"—"}</td>
   <td>{Number(x.sentAmount).toFixed(4)}</td><td>{Number(x.totalProfit??x.actualResult).toFixed(2)} ₽</td><td>{statusName(x.status)}</td>
   <td>
@@ -166,7 +166,7 @@ export default function Operations(){
  </>}
  {mode==="view"&&<>
   <h3>Операция №{selected.number} — {statusName(selected.status)}</h3>
-  <p>Получено: {Number(selected.receivedAmount).toFixed(2)} ₽{Number(selected.tariffPercent)>0?` · Тариф: ${Number(selected.tariffPercent)}%`:" · По курсу без тарифа"}</p>
+  <p>Трейдер: {selected.author?.name??"—"}</p><p>Получено: {Number(selected.receivedAmount).toFixed(2)} ₽{Number(selected.tariffPercent)>0?` · Тариф: ${Number(selected.tariffPercent)}%`:" · По курсу без тарифа"}</p>
   <p>Курс заливки: {selected.clientRate?Number(selected.clientRate).toFixed(4):"—"} ₽/USDT · Курс покупки: {selected.actualExchangeRate?Number(selected.actualExchangeRate).toFixed(4):"—"} ₽/USDT{(selected.payouts?.length??0)>0&&" (средневзвешенные по частям)"}</p>
   <p>Клиенту: {Number(selected.sentAmount).toFixed(4)} USDT{Number(selected.expectedCommission)>0?` · Доход по тарифу: ${Number(selected.expectedCommission).toFixed(2)} ₽`:""}</p>
   <p>Доход на курсах: {selected.exchangeProfit!=null?`${Number(selected.exchangeProfit).toFixed(2)} ₽`:"—"} · Общий доход: {Number(selected.totalProfit??selected.actualResult).toFixed(2)} ₽</p>
