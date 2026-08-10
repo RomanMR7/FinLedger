@@ -4,11 +4,11 @@ import {calculateDeal} from "@/src/lib/financial";
 import {fetchJson} from "@/src/lib/client";
 type Payout={id:string;amountRub:string;clientRate:string;actualRate:string;payoutUsdt:string;tariffProfit:string;exchangeProfit:string;totalProfit:string;date:string};
 type Op={id:string;number:number;date:string;status:string;receivedAmount:string;tariffPercent:string;clientRate:string|null;actualExchangeRate:string|null;expenses:string;sentAmount:string;expectedCommission:string;exchangeProfit:string|null;totalProfit:string|null;actualResult:string;requisiteId:string|null;payouts?:Payout[];author?:{name:string;email:string}};
-type F={receivedAmount:number;tariffPercent:number;clientRate:number;actualExchangeRate:number;expenses:number};
+type F={receivedAmount:number;tariffPercent:number;clientRate:number;actualExchangeRate:number;expenses:number;purchaseAmountRub:number};
 type PayoutF={amountRub:number;clientRate:number;actualRate:number};
 type Tariff={id:string;name:string;percent:string|number};
 type Requisite={id:string;name:string;active:boolean;availableToday:number};type Rate={id:string;name:string;clientRate:string|number;actualRate:string|number};
-const initial:F={receivedAmount:0,tariffPercent:0,clientRate:92,actualExchangeRate:86.15,expenses:0};
+const initial:F={receivedAmount:0,tariffPercent:0,clientRate:92,actualExchangeRate:86.15,expenses:0,purchaseAmountRub:0};
 const statusName=(v:string)=>({DRAFT:"Черновик",PROCESSING:"В работе",COMPLETED:"Завершена",CANCELLED:"Отменена"}[v]??v);
 const paidOf=(x:Op)=>(x.payouts??[]).reduce((a,p)=>a+Number(p.amountRub),0);
 const remainingOf=(x:Op)=>Math.max(0,Number(x.receivedAmount)-paidOf(x));
@@ -82,7 +82,7 @@ export default function Operations(){
  }
  function openEdit(x:Op){
   setSelected(x);
-  setEf({receivedAmount:Number(x.receivedAmount),tariffPercent:Number(x.tariffPercent),clientRate:Number(x.clientRate??92),actualExchangeRate:Number(x.actualExchangeRate??86.15),expenses:Number(x.expenses)});
+  setEf({receivedAmount:Number(x.receivedAmount),tariffPercent:Number(x.tariffPercent),clientRate:Number(x.clientRate??92),actualExchangeRate:Number(x.actualExchangeRate??86.15),expenses:Number(x.expenses),purchaseAmountRub:0});
   setEditRequisiteId(x.requisiteId??"");
   setMode("edit");
  }
@@ -101,9 +101,9 @@ export default function Operations(){
   {rates.length>0&&<label>Пара курсов<select defaultValue="" onChange={e=>{const rate=rates.find(x=>x.id===e.target.value);if(rate){set("clientRate",String(rate.clientRate));set("actualExchangeRate",String(rate.actualRate))}}}><option value="">Выберите курс</option>{rates.map(rate=><option value={rate.id} key={rate.id}>{rate.name}: {rate.clientRate} / {rate.actualRate}</option>)}</select></label>}
   <label>Карта / SIM приёма<select value={requisiteId} onChange={e=>setRequisiteId(e.target.value)}><option value="">Без привязки</option>{requisiteOptions(requisiteId)}</select></label>
   <Num label="Курс заливки на карту, ₽ за 1 USDT" value={f.clientRate} set={v=>set("clientRate",v)}/>
-  <Num label="Курс покупки USDT, ₽ за 1 USDT" value={f.actualExchangeRate} set={v=>set("actualExchangeRate",v)}/>
+  <Num label="Курс покупки USDT, ₽ за 1 USDT" value={f.actualExchangeRate} set={v=>set("actualExchangeRate",v)}/><Num label="Потрачено на покупку USDT, ₽" value={f.purchaseAmountRub} set={v=>set("purchaseAmountRub",v)}/>
   <Num label="Расходы, ₽" value={f.expenses} set={v=>set("expenses",v)}/>
- </div><Summary c={c}/><button>Сохранить новую операцию</button></form>
+ </div><Summary c={c}/>{f.purchaseAmountRub>0&&<p className="notice">Куплено: {(f.purchaseAmountRub/f.actualExchangeRate).toFixed(4)} USDT · Осталось отдать: {Math.max(0,c.payoutUsdt-f.purchaseAmountRub/f.actualExchangeRate).toFixed(4)} USDT</p>}<button>Сохранить новую операцию</button></form>
  <p>{message}</p>
  <h3>Журнал операций ({meta.total})</h3>
  <section className="filter">

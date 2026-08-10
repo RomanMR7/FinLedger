@@ -78,6 +78,8 @@ model Operation {
  actualExchangeRate Decimal?
  exchangeProfit Decimal?
  totalProfit Decimal?
+ purchaseAmountRub Decimal?
+ purchasedUsdt Decimal?
  clientReference String?
  note String?
  createdAt DateTime @default(now())
