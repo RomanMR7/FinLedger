@@ -158,7 +158,7 @@ export default function Operations(){
    <Num label="Курс заливки на карту, ₽ за 1 USDT" value={pf.clientRate} set={v=>setP("clientRate",v)}/>
    <Num label="Курс покупки USDT, ₽ за 1 USDT" value={pf.actualRate} set={v=>setP("actualRate",v)}/>
   </div>
-  {pc&&pf.amountRub>0&&<section className="cards"><Card t="Будет куплено" v={`${pc.purchasedUsdt.toFixed(4)} USDT`}/><Card t="Останется отдать" v={`${pc.remainingUsdt.toFixed(4)} USDT`}/>{pc.overUsdt>0&&<Card t="Куплено сверх обязательства" v={`${pc.overUsdt.toFixed(4)} USDT`}/></section>}
+  {pc&&pf.amountRub>0&&<section className="cards"><Card t="Будет куплено" v={`${pc.purchasedUsdt.toFixed(4)} USDT`}/><Card t="Останется отдать" v={`${pc.remainingUsdt.toFixed(4)} USDT`}/>{pc.overUsdt>0&&<Card t="Куплено сверх обязательства" v={`${pc.overUsdt.toFixed(4)} USDT`}/>}</section>}
   <button onClick={addPayout}>Записать обмен</button>
   <PayoutList op={selected} onRemove={removePayout}/>
   {remainingOf(selected)<=0.01&&(selected.payouts?.length??0)>0&&selected.status!=="COMPLETED"&&<button className="done-big" onClick={()=>action(selected.id,{status:"COMPLETED"})}>Вся сумма обменяна — завершить операцию</button>}
