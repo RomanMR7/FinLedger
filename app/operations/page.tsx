@@ -11,7 +11,7 @@ type Requisite={id:string;name:string;active:boolean;availableToday:number};type
 const initial:F={receivedAmount:0,tariffPercent:0,clientRate:92,actualExchangeRate:86.15,expenses:0,purchaseAmountRub:0};
 const statusName=(v:string)=>({DRAFT:"Черновик",PROCESSING:"В работе",COMPLETED:"Завершена",CANCELLED:"Отменена"}[v]??v);
 const paidOf=(x:Op)=>(x.payouts??[]).reduce((a,p)=>a+Number(p.amountRub),0);
-const remainingOf=(x:Op)=>Math.max(0,Number(x.receivedAmount)-paidOf(x));
+const remainingOf=(x:Op)=>Math.max(0,Number(x.sentAmount)-Number(x.purchasedUsdt??0));
 export default function Operations(){
  const [f,setF]=useState<F>(initial),[tariffs,setTariffs]=useState<Tariff[]>([]),[rates,setRates]=useState<Rate[]>([]),[requisites,setRequisites]=useState<Requisite[]>([]),[requisiteId,setRequisiteId]=useState(""),[choice,setChoice]=useState("0");
  const [ef,setEf]=useState<F>(initial),[editRequisiteId,setEditRequisiteId]=useState("");
@@ -88,7 +88,7 @@ export default function Operations(){
  }
  function openPayout(x:Op){
   setSelected(x);
-  setPf({amountRub:remainingOf(x),clientRate:Number(x.clientRate??92),actualRate:Number(x.actualExchangeRate??86.15)});
+  setPf({amountRub:remainingOf(x)*Number(x.actualExchangeRate??86.15),clientRate:Number(x.clientRate??92),actualRate:Number(x.actualExchangeRate??86.15)});
   setMode("payout");
  }
  const requisiteOptions=(current:string)=>requisites.filter(r=>r.active||r.id===current).map(r=><option key={r.id} value={r.id}>{r.name} · доступно {Number(r.availableToday).toFixed(0)} ₽</option>);
@@ -121,7 +121,7 @@ export default function Operations(){
  <table><thead><tr><th>№</th><th>Дата</th><th>Трейдер</th><th>Сумма</th><th>Обменяно</th><th>USDT</th><th>Доход</th><th>Статус</th><th></th></tr></thead><tbody>
  {rows.map(x=>{const paid=paidOf(x),remaining=remainingOf(x),open=x.status!=="COMPLETED"&&x.status!=="CANCELLED";return <tr key={x.id}>
   <td>{x.number}</td><td>{new Date(x.date).toLocaleDateString("ru-RU")}</td><td>{x.author?.name??"—"}</td><td>{Number(x.receivedAmount).toFixed(2)} ₽</td>
-  <td>{(x.payouts?.length??0)>0?`${paid.toFixed(0)} ₽${remaining>0?` (ост. ${remaining.toFixed(0)})`:" ✓"}`:"—"}</td>
+  <td>{(x.payouts?.length??0)>0?`куплено ${Number(x.purchasedUsdt??0).toFixed(4)} USDT${remaining>0?` (ост. ${remaining.toFixed(4)} USDT)`:" ✓"}`:"—"}</td>
   <td>{Number(x.sentAmount).toFixed(4)}</td><td>{Number(x.totalProfit??x.actualResult).toFixed(2)} ₽</td><td>{statusName(x.status)}</td>
   <td>
    {open&&<button className="small done" onClick={()=>openPayout(x)}>Обмен</button>}
